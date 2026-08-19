@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вдосконалювач VKInfoRobot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#e5e7e2;
+  --surface:#fafbf8;
+  --surface-2:#f0f2ed;
+  --ink:#15171b;
+  --muted:#6f746d;
+  --rule:#c8ccc4;
+  --rule-soft:#dcdfd8;
+  --teal:#0e6e5e;
+  --teal-tint:#d7ebe5;
+  --crimson:#9e2a3c;
+  --crimson-tint:#f2dde1;
+  --amber:#8a6a12;
+  --amber-tint:#f3e9c6;
+  --shadow:0 1px 0 rgba(21,23,27,.05), 0 8px 24px -18px rgba(21,23,27,.5);
+  --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --sans:"IBM Plex Sans", system-ui, "Segoe UI", Roboto, sans-serif;
+  --display:"Unbounded", "IBM Plex Sans", system-ui, sans-serif;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 80px}
+
+/* ── masthead ─────────────────────────────── */
+.masthead{
+  border-bottom:1px solid var(--rule);
+  padding:26px 0 18px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:wrap;
+}
+.wordmark{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:clamp(21px,3.4vw,32px);
+  letter-spacing:-.02em;
+  line-height:1.05;
+  margin:0;
+}
+.wordmark em{font-style:normal;color:var(--teal)}
+.eyebrow{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin:0 0 8px;
+}
+.rules-toggle{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--ink);
+  background:none;
+  border:1px solid var(--rule);
+  border-radius:2px;
+  padding:6px 11px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.rules-toggle:hover{background:var(--surface)}
+.rules{
+  display:none;
+  border:1px solid var(--rule);
+  border-top:none;
+  background:var(--surface);
+  padding:16px 18px;
+  font-size:13.5px;
+}
+.rules.open{display:block}
+.rules ol{margin:0;padding-left:20px}
+.rules li{margin:5px 0}
+.rules code{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);padding:1px 4px;border-radius:2px}
+
+/* ── input ────────────────────────────────── */
+.panel{margin-top:26px}
+.panel-label{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  margin-bottom:7px;
+}
+textarea{
+  width:100%;
+  min-height:190px;
+  resize:vertical;
+  background:var(--surface);
+  border:1px solid var(--rule);
+  border-radius:3px;
+  padding:14px 16px;
+  font-family:var(--mono);
+  font-size:12.5px;
+  line-height:1.65;
+  color:var(--ink);
+  box-shadow:var(--shadow);
+}
+textarea:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal)}
+textarea.drag{border-color:var(--teal);background:var(--teal-tint)}
+
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+button{font-family:var(--sans);font-size:14px;cursor:pointer}
+.btn{
+  border:1px solid var(--rule);
+  background:var(--surface);
+  color:var(--ink);
+  border-radius:3px;
+  padding:9px 16px;
+  font-weight:500;
+}
+.btn:hover{background:var(--surface-2)}
+.btn-main{
+  background:var(--teal);
+  border-color:var(--teal);
+  color:#fff;
+  font-weight:600;
+  padding:9px 22px;
+}
+.btn-main:hover{background:#0b5a4c}
+.btn-sm{padding:6px 12px;font-size:13px}
+.spacer{flex:1 1 auto}
+.opt{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  font-size:13.5px;
+  color:var(--ink);
+  cursor:pointer;
+  user-select:none;
+}
+.opt input{accent-color:var(--teal);width:15px;height:15px;cursor:pointer}
+
+/* ── status strip ─────────────────────────── */
+.strip{
+  margin-top:30px;
+  border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);
+  padding:11px 0;
+  display:flex;
+  gap:22px;
+  align-items:center;
+  flex-wrap:wrap;
+  font-family:var(--mono);
+  font-size:12px;
+}
+.stat{color:var(--muted);letter-spacing:.02em;white-space:nowrap}
+.stat b{color:var(--ink);font-weight:600;font-size:14px;margin-left:5px}
+.stat.ok b{color:var(--teal)}
+.stat.bad b{color:var(--crimson)}
+.stat.fix b{color:var(--amber)}
+
+.toolbar{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin:16px 0 4px;
+}
+.chip{
+  font-family:var(--mono);
+  font-size:12px;
+  border:1px solid var(--rule);
+  background:transparent;
+  border-radius:999px;
+  padding:5px 13px;
+  color:var(--muted);
+}
+.chip:hover{background:var(--surface)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+
+/* ── table ────────────────────────────────── */
+.table-shell{margin-top:12px;border:1px solid var(--rule);background:var(--surface);border-radius:3px;box-shadow:var(--shadow);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{
+  position:sticky;top:0;z-index:3;
+  background:var(--surface-2);
+  border-bottom:1px solid var(--rule);
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:500;
+  text-align:left;
+  padding:11px 16px;
+}
+th.c-num{width:52px;text-align:right}
+th.c-img{width:210px}
+tbody tr{border-bottom:1px solid var(--rule-soft)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#fff}
+tbody tr.hide{display:none}
+td{padding:14px 16px;vertical-align:top}
+td.c-num{
+  text-align:right;
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--muted);
+  padding-top:16px;
+}
+
+/* URL diff — the signature */
+.link-line{display:flex;gap:9px;align-items:flex-start;font-family:var(--mono);font-size:12.5px;line-height:1.65;word-break:break-all}
+.link-line + .link-line{margin-top:7px}
+.tag{
+  flex:0 0 auto;
+  font-size:9.5px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:2px 6px;
+  border-radius:2px;
+  margin-top:2px;
+  font-weight:600;
+}
+.tag-old{background:var(--crimson-tint);color:var(--crimson)}
+.tag-new{background:var(--teal-tint);color:var(--teal)}
+.tag-only{background:var(--surface-2);color:var(--muted)}
+.u{color:var(--ink);text-decoration:none}
+a.u:hover{text-decoration:underline}
+.dead{color:var(--muted)}
+.seg-old{background:var(--crimson-tint);color:var(--crimson);text-decoration:line-through;padding:0 2px;border-radius:2px}
+.seg-new{background:var(--teal-tint);color:var(--teal);padding:0 2px;border-radius:2px;font-weight:600}
+.seg-add{background:var(--amber-tint);color:var(--amber);padding:0 2px;border-radius:2px;font-weight:600}
+
+.row-meta{display:flex;gap:10px;align-items:center;margin-top:9px;flex-wrap:wrap}
+.dup{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--muted);
+  border:1px solid var(--rule);
+  border-radius:2px;
+  padding:1px 6px;
+}
+.copy{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--muted);
+  background:none;
+  border:none;
+  border-bottom:1px dashed var(--rule);
+  padding:0 0 1px;
+}
+.copy:hover{color:var(--teal);border-color:var(--teal)}
+
+/* image cell */
+.thumb-box{
+  width:178px;height:178px;
+  border:1px solid var(--rule-soft);
+  background:
+    linear-gradient(45deg,var(--surface-2) 25%,transparent 25%) 0 0/14px 14px,
+    linear-gradient(-45deg,var(--surface-2) 25%,transparent 25%) 0 7px/14px 14px,
+    linear-gradient(45deg,transparent 75%,var(--surface-2) 75%) 7px -7px/14px 14px,
+    linear-gradient(-45deg,transparent 75%,var(--surface-2) 75%) -7px 0/14px 14px,
+    #fff;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;position:relative;border-radius:2px;
+}
+.thumb-box img{
+  width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;
+  opacity:0;transition:opacity .25s ease;
+}
+.thumb-box img.in{opacity:1}
+.state{
+  font-family:var(--mono);
+  font-size:11px;
+  text-align:center;
+  padding:0 10px;
+  color:var(--muted);
+  letter-spacing:.04em;
+}
+.state.err{color:var(--crimson)}
+.pulse{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:.85}}
+
+/* empty state */
+.empty{
+  border:1px dashed var(--rule);
+  border-radius:3px;
+  padding:56px 24px;
+  text-align:center;
+  color:var(--muted);
+  margin-top:26px;
+}
+.empty b{display:block;color:var(--ink);font-family:var(--display);font-weight:500;font-size:17px;margin-bottom:8px;letter-spacing:-.01em}
+.hidden{display:none !important}
+
+/* lightbox */
+.lb{
+  position:fixed;inset:0;z-index:50;
+  background:rgba(21,23,27,.9);
+  display:none;align-items:center;justify-content:center;
+  padding:32px;cursor:zoom-out;
+}
+.lb.open{display:flex}
+.lb img{max-width:100%;max-height:82vh;box-shadow:0 30px 80px -30px #000}
+.lb .cap{
+  position:absolute;bottom:20px;left:0;right:0;text-align:center;
+  font-family:var(--mono);font-size:11.5px;color:#c9ccc6;word-break:break-all;padding:0 24px;
+}
+
+/* toast */
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:var(--paper);
+  font-family:var(--mono);font-size:12.5px;
+  padding:10px 18px;border-radius:3px;
+  opacity:0;pointer-events:none;transition:.22s ease;z-index:60;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+footer{
+  margin-top:34px;padding-top:16px;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:11px;color:var(--muted);
+  display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+}
+
+/* mobile: table → cards */
+@media (max-width:760px){
+  .wrap{padding:0 14px 60px}
+  thead{display:none}
+  tbody tr{display:block;border-bottom:1px solid var(--rule);padding:14px 12px}
+  td{display:block;padding:0}
+  td.c-num{text-align:left;margin-bottom:8px}
+  td.c-num::before{content:"№ "}
+  td.c-img{margin-top:12px}
+  .thumb-box{width:100%;height:220px}
+  .table-shell{background:var(--surface)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+}
+@media print{
+  .controls,.toolbar,textarea,.panel-label,.rules-toggle,.masthead .eyebrow{display:none}
+  body{background:#fff}
+  .table-shell{box-shadow:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">Розбір вигрузок · відновлення мертвих посилань</p>
+      <h1 class="wordmark">Вдосконалювач <em>VKInfoRobot</em></h1>
+    </div>
+    <button class="rules-toggle" id="rulesBtn" aria-expanded="false">Як лагодяться посилання ▾</button>
+  </header>
+
+  <section class="rules" id="rulesBox">
+    <ol>
+      <li>З тексту витягуються всі посилання — розділені <code>;</code>, комами, пробілами чи переносами рядка.</li>
+      <li><code>http://cs316423.vk.me/v316423586/64dd/f.jpg</code> → <code>https://pp.userapi.com/<b>c316423</b>/v316423586/64dd/f.jpg</code> — домен міняється, номер сервера переїжджає у шлях.</li>
+      <li>Якщо кластер <code>/cNNNN/</code> уже є в шляху — просто міняється домен: <code>cs7052.vk.me/c540105/…</code> → <code>pp.userapi.com/c540105/…</code>.</li>
+      <li>Будь-який інший <code>*.vk.me</code> (зокрема <code>pp.vk.me</code>) також переводиться на <code>pp.userapi.com</code>.</li>
+      <li><code>http://</code> скрізь замінюється на <code>https://</code>.</li>
+      <li>Якщо виправлене посилання не відкривається — картинка ще раз пробується за оригінальним.</li>
+    </ol>
+  </section>
+
+  <section class="panel">
+    <div class="panel-label">
+      <span>Вигрузка</span>
+      <span id="charCount">0 символів</span>
+    </div>
+    <textarea id="input" spellcheck="false" placeholder="Вставте сюди вигрузку цілком — з іменами, ID, телефонами, чим завгодно.&#10;Потрібні посилання знайдуться самі: через крапку з комою, через кому, з пробілами чи з нового рядка.&#10;&#10;Файл .txt можна просто перетягнути в це поле."></textarea>
+    <div class="controls">
+      <button class="btn btn-main" id="run">Розібрати</button>
+      <button class="btn" id="sample">Вставити приклад</button>
+      <button class="btn" id="clear">Очистити</button>
+      <span class="spacer"></span>
+      <label class="opt"><input type="checkbox" id="optDedup" checked> Згортати повтори</label>
+      <label class="opt"><input type="checkbox" id="optImages" checked> Лише зображення</label>
+    </div>
+  </section>
+
+  <div id="results" class="hidden">
+    <div class="strip">
+      <span class="stat">Знайдено<b id="sFound">0</b></span>
+      <span class="stat">Унікальних<b id="sUniq">0</b></span>
+      <span class="stat fix">Виправлено<b id="sFixed">0</b></span>
+      <span class="stat ok">Завантажено<b id="sOk">0</b></span>
+      <span class="stat bad">Не відкрились<b id="sBad">0</b></span>
+      <span class="spacer"></span>
+      <span class="stat" id="sPending"></span>
+    </div>
+
+    <div class="toolbar">
+      <button class="chip" data-filter="all" aria-pressed="true">Усі</button>
+      <button class="chip" data-filter="ok" aria-pressed="false">Завантажені</button>
+      <button class="chip" data-filter="bad" aria-pressed="false">Не відкрились</button>
+      <button class="chip" data-filter="fixed" aria-pressed="false">Виправлені</button>
+      <span class="spacer"></span>
+      <button class="btn btn-sm" id="copyAll">Копіювати посилання</button>
+      <button class="btn btn-sm" id="saveCsv">Зберегти CSV</button>
+    </div>
+
+    <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th class="c-num">№</th>
+            <th>Посилання</th>
+            <th class="c-img">Зображення</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty" id="empty">
+    <b>Таблиця з’явиться тут</b>
+    Вставте текст вигрузки вище і натисніть «Розібрати».
+  </div>
+
+  <footer>
+    <span>Вдосконалювач VKInfoRobot · один файл, працює офлайн (окрім самих картинок)</span>
+    <span id="clock"></span>
+  </footer>
+</div>
+
+<div class="lb" id="lightbox"><img id="lbImg" alt=""><div class="cap" id="lbCap"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ══ 1. пошук посилань у сирому тексті ═══════════════════════ */
+var URL_RE = /\b(?:https?:\/\/|\/\/)?(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}(?::\d{2,5})?\/[^\s;,"'<>()\[\]{}«»\\]+/gi;
+var IMG_RE = /\.(jpe?g|png|gif|webp|bmp|jfif|tiff?)$/i;
+
+function grab(text){
+  var out = [], m;
+  URL_RE.lastIndex = 0;
+  while ((m = URL_RE.exec(text)) !== null){
+    var raw = m[0].replace(/[.,;:!?)\]}»"'…]+$/, "");
+    if (raw.length > 12) out.push(raw);
+  }
+  return out;
+}
+
+/* ══ 2. лагодження посилання ═════════════════════════════════ */
+function fix(raw){
+  var work = raw.trim();
+  var hadScheme = /^https?:\/\//i.test(work);
+  if (/^\/\//.test(work)) work = "http:" + work;
+  else if (!hadScheme) work = "http://" + work;
+
+  var u;
+  try { u = new URL(work); } catch(e){ return null; }
+
+  var host = u.hostname.toLowerCase();
+  var path = u.pathname;
+  var newHost = host, cluster = null, hostChanged = false;
+
+  var cs = host.match(/^cs(\d+)\.(?:vk\.me|userapi\.com)$/);
+  if (cs){
+    newHost = "pp.userapi.com";
+    hostChanged = true;
+    if (!/^\/c\d+\//.test(path)) cluster = "c" + cs[1];   // сервер переїжджає у шлях
+  } else if (/(^|\.)vk\.me$/.test(host)){
+    newHost = "pp.userapi.com";
+    hostChanged = true;
+  }
+
+  var fixed = "https://" + newHost + (cluster ? "/" + cluster : "") + path + u.search;
+  var original = (hadScheme ? "" : "http://") + raw.replace(/^\/\//, "http://");
+  if (hadScheme) original = raw;
+
+  return {
+    original: original,
+    fixed: fixed,
+    changed: fixed !== original,
+    hostChanged: hostChanged,
+    scheme: u.protocol,
+    host: host,
+    newHost: newHost,
+    cluster: cluster,
+    tail: path + u.search,
+    isImage: IMG_RE.test(u.pathname)
+  };
+}
+
+/* ══ 3. допоміжне ════════════════════════════════════════════ */
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+  });
+}
+function toast(msg){
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._t);
+  t._t = setTimeout(function(){ t.classList.remove("show"); }, 1900);
+}
+function copyText(text, msg){
+  if (navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(function(){ toast(msg); }, function(){ fallbackCopy(text, msg); });
+  } else fallbackCopy(text, msg);
+}
+function fallbackCopy(text, msg){
+  var ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); toast(msg); } catch(e){ toast("Не вдалось скопіювати"); }
+  document.body.removeChild(ta);
+}
+
+/* ══ 4. стан ═════════════════════════════════════════════════ */
+var rows = [];
+var counts = { found:0, uniq:0, fixed:0, ok:0, bad:0 };
+var filter = "all";
+
+var $ = function(id){ return document.getElementById(id); };
+var tbody = $("tbody");
+
+function renderStats(){
+  $("sFound").textContent = counts.found;
+  $("sUniq").textContent  = counts.uniq;
+  $("sFixed").textContent = counts.fixed;
+  $("sOk").textContent    = counts.ok;
+  $("sBad").textContent   = counts.bad;
+  var left = counts.uniq - counts.ok - counts.bad;
+  $("sPending").textContent = left > 0 ? "у черзі: " + left : "усі перевірені";
+}
+
+function applyFilter(){
+  rows.forEach(function(r){
+    var show =
+      filter === "all"   ? true :
+      filter === "ok"    ? r.status === "ok" :
+      filter === "bad"   ? r.status === "bad" :
+      filter === "fixed" ? r.data.changed : true;
+    r.tr.classList.toggle("hide", !show);
+  });
+}
+
+/* ── розмітка комірки з посиланнями (діф) ── */
+function linkCell(d){
+  var box = document.createElement("div");
+
+  if (!d.changed){
+    box.innerHTML =
+      '<div class="link-line"><span class="tag tag-only">Посилання</span>' +
+      '<a class="u" target="_blank" rel="noreferrer noopener" href="' + esc(d.original) + '">' + esc(d.original) + '</a></div>';
+  } else {
+    var origHtml =
+      '<span class="' + (d.scheme === "http:" ? "seg-old" : "") + '">' + esc(d.scheme) + '//</span>' +
+      '<span class="' + (d.hostChanged ? "seg-old" : "") + '">' + esc(d.host) + '</span>' +
+      '<span class="dead">' + esc(d.tail) + '</span>';
+
+    var fixHtml =
+      '<span class="seg-new">https://</span>' +
+      '<span class="' + (d.hostChanged ? "seg-new" : "") + '">' + esc(d.newHost) + '</span>' +
+      (d.cluster ? '<span class="seg-add">/' + esc(d.cluster) + '</span>' : "") +
+      esc(d.tail);
+
+    box.innerHTML =
+      '<div class="link-line"><span class="tag tag-old">Оригінал</span><span class="dead">' + origHtml + '</span></div>' +
+      '<div class="link-line"><span class="tag tag-new">Виправлене</span>' +
+      '<a class="u" target="_blank" rel="noreferrer noopener" href="' + esc(d.fixed) + '">' + fixHtml + '</a></div>';
+  }
+
+  var meta = document.createElement("div");
+  meta.className = "row-meta";
+  var cp = document.createElement("button");
+  cp.className = "copy";
+  cp.type = "button";
+  cp.textContent = "копіювати";
+  cp.addEventListener("click", function(){ copyText(d.fixed, "Посилання скопійоване"); });
+  meta.appendChild(cp);
+  if (d.dupes > 1){
+    var dup = document.createElement("span");
+    dup.className = "dup";
+    dup.textContent = "у вигрузці " + d.dupes + "×";
+    meta.appendChild(dup);
+  }
+  box.appendChild(meta);
+  return box;
+}
+
+/* ── комірка з картинкою ── */
+function imageCell(d, row){
+  var box = document.createElement("div");
+  box.className = "thumb-box";
+
+  var state = document.createElement("div");
+  state.className = "state pulse";
+  state.textContent = "завантаження…";
+  box.appendChild(state);
+
+  var chain = [d.fixed];
+  if (d.original !== d.fixed) chain.push(d.original);
+  var step = 0;
+
+  var img = document.createElement("img");
+  img.alt = "";
+  img.loading = "lazy";
+  img.decoding = "async";
+  img.referrerPolicy = "no-referrer";
+
+  img.addEventListener("load", function(){
+    state.remove();
+    img.classList.add("in");
+    row.status = "ok";
+    counts.ok++;
+    renderStats();
+    applyFilter();
+  });
+  img.addEventListener("error", function(){
+    step++;
+    if (step < chain.length){
+      state.textContent = "пробую оригінал…";
+      img.src = chain[step];
+      return;
+    }
+    img.remove();
+    state.classList.remove("pulse");
+    state.classList.add("err");
+    state.textContent = "не відкрилось";
+    row.status = "bad";
+    counts.bad++;
+    renderStats();
+    applyFilter();
+  });
+  img.addEventListener("click", function(){
+    $("lbImg").src = img.currentSrc || img.src;
+    $("lbCap").textContent = img.currentSrc || img.src;
+    $("lightbox").classList.add("open");
+  });
+
+  img.src = chain[0];
+  box.appendChild(img);
+  return box;
+}
+
+/* ══ 5. головний прохід ══════════════════════════════════════ */
+function run(){
+  var text = $("input").value;
+  var raws = grab(text);
+  var onlyImages = $("optImages").checked;
+  var dedup = $("optDedup").checked;
+
+  var list = [], seen = Object.create(null), found = 0;
+
+  raws.forEach(function(raw){
+    var d = fix(raw);
+    if (!d) return;
+    if (onlyImages && !d.isImage) return;
+    found++;
+    if (dedup && seen[d.fixed] !== undefined){
+      list[seen[d.fixed]].dupes++;
+      return;
+    }
+    d.dupes = 1;
+    seen[d.fixed] = list.length;
+    list.push(d);
+  });
+
+  rows = [];
+  counts = { found:found, uniq:list.length, fixed:0, ok:0, bad:0 };
+  tbody.innerHTML = "";
+
+  if (!list.length){
+    $("results").classList.add("hidden");
+    var e = $("empty");
+    e.classList.remove("hidden");
+    e.innerHTML = "<b>Посилань не знайдено</b>" +
+      (onlyImages
+        ? "У тексті немає адрес, що закінчуються на .jpg, .png, .gif чи .webp. Зніміть галочку «Лише зображення», щоб показати всі посилання."
+        : "Перевірте, чи текст вставився повністю.");
+    return;
+  }
+
+  var frag = document.createDocumentFragment();
+  list.forEach(function(d, i){
+    if (d.changed) counts.fixed++;
+    var tr = document.createElement("tr");
+    var row = { tr:tr, data:d, status:"wait" };
+
+    var tdN = document.createElement("td");
+    tdN.className = "c-num";
+    tdN.textContent = i + 1;
+
+    var tdL = document.createElement("td");
+    tdL.appendChild(linkCell(d));
+
+    var tdI = document.createElement("td");
+    tdI.className = "c-img";
+    tdI.appendChild(imageCell(d, row));
+
+    tr.appendChild(tdN); tr.appendChild(tdL); tr.appendChild(tdI);
+    frag.appendChild(tr);
+    rows.push(row);
+  });
+
+  tbody.appendChild(frag);
+  $("empty").classList.add("hidden");
+  $("results").classList.remove("hidden");
+  renderStats();
+  applyFilter();
+  $("results").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+/* ══ 6. експорт ══════════════════════════════════════════════ */
+function csv(){
+  var q = function(s){ return '"' + String(s).replace(/"/g, '""') + '"'; };
+  var lines = ["№;Оригінальне посилання;Виправлене посилання;Повторів;Статус"];
+  rows.forEach(function(r, i){
+    var st = r.status === "ok" ? "завантажилось" : r.status === "bad" ? "не відкрилось" : "у черзі";
+    lines.push([i+1, q(r.data.original), q(r.data.fixed), r.data.dupes, st].join(";"));
+  });
+  var blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type:"text/csv;charset=utf-8" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "vkinforobot-avatarky.csv";
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+  toast("Файл CSV збережено");
+}
+
+/* ══ 7. події ════════════════════════════════════════════════ */
+$("run").addEventListener("click", run);
+$("clear").addEventListener("click", function(){
+  $("input").value = "";
+  $("input").dispatchEvent(new Event("input"));
+  rows = [];
+  tbody.innerHTML = "";
+  $("results").classList.add("hidden");
+  var e = $("empty");
+  e.classList.remove("hidden");
+  e.innerHTML = "<b>Таблиця з’явиться тут</b>Вставте текст вигрузки вище і натисніть «Розібрати».";
+  $("input").focus();
+});
+$("sample").addEventListener("click", function(){
+  $("input").value =
+"ID: 617326746\n" +
+"Ім'я: Іван Петренко\n" +
+"Місто: Київ\n" +
+"Фото: https://pp.vk.me/c617326/v617326746/119d0/p5e0eIk6stI.jpg;https://pp.vk.me/c617326/v617326746/119cf/O8wN4YprtfY.jpg;https://pp.vk.me/c617326/v617326746/119ce/HiMSrSTd2rw.jpg;https://pp.vk.me/c617326/v617326746/119ce/HiMSrSTd2rw.jpg;https://pp.vk.me/c617326/v617326746/10a5a/rOIGOZg-3sY.jpg;https://pp.vk.me/c617326/v617326746/10a5b/-EdodsbDV28.jpg;https://pp.vk.me/c617326/v617326746/10a5b/-EdodsbDV28.jpg;\n" +
+"Стара аватарка: http://cs316423.vk.me/v316423586/64dd/f-W3-NZWpb0.jpg\n" +
+"Ще одна: http://cs7052.vk.me/c540105/v540105746/1a2b3/QwErTyUiOp0.jpg\n" +
+"Телефон: +380670000000\n" +
+"Сторінка: https://vk.com/id617326746";
+  $("input").dispatchEvent(new Event("input"));
+  run();
+});
+$("copyAll").addEventListener("click", function(){
+  copyText(rows.map(function(r){ return r.data.fixed; }).join("\n"), "Скопійовано посилань: " + rows.length);
+});
+$("saveCsv").addEventListener("click", csv);
+
+Array.prototype.forEach.call(document.querySelectorAll(".chip"), function(c){
+  c.addEventListener("click", function(){
+    filter = c.dataset.filter;
+    Array.prototype.forEach.call(document.querySelectorAll(".chip"), function(o){
+      o.setAttribute("aria-pressed", String(o === c));
+    });
+    applyFilter();
+  });
+});
+
+$("rulesBtn").addEventListener("click", function(){
+  var open = $("rulesBox").classList.toggle("open");
+  $("rulesBtn").setAttribute("aria-expanded", String(open));
+  $("rulesBtn").textContent = open ? "Як лагодяться посилання ▴" : "Як лагодяться посилання ▾";
+});
+
+$("input").addEventListener("input", function(){
+  var n = $("input").value.length;
+  $("charCount").textContent = n.toLocaleString("uk-UA") + " символів";
+});
+$("input").addEventListener("keydown", function(e){
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") run();
+});
+
+// перетягування файлу
+var ta = $("input");
+["dragenter","dragover"].forEach(function(ev){
+  ta.addEventListener(ev, function(e){ e.preventDefault(); ta.classList.add("drag"); });
+});
+["dragleave","drop"].forEach(function(ev){
+  ta.addEventListener(ev, function(e){ e.preventDefault(); ta.classList.remove("drag"); });
+});
+ta.addEventListener("drop", function(e){
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if (!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    ta.value = r.result;
+    ta.dispatchEvent(new Event("input"));
+    run();
+  };
+  r.readAsText(f, "utf-8");
+});
+
+// лайтбокс
+$("lightbox").addEventListener("click", function(){ this.classList.remove("open"); });
+document.addEventListener("keydown", function(e){
+  if (e.key === "Escape") $("lightbox").classList.remove("open");
+});
+
+$("clock").textContent = new Date().toLocaleDateString("uk-UA", { day:"2-digit", month:"long", year:"numeric" });
+})();
+</script>
+</body>
+</html>
